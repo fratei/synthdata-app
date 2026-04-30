@@ -1,0 +1,74 @@
+name: "🔄 CI/CD Pipeline"
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ─── PR checks: lint + test only ─────────────────────────────────────
+  pr-checks:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci --if-present
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Test
+        run: npm test --if-present
+
+  # ─── Push to main: build + deploy ────────────────────────────────────
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci --if-present
+
+      - name: Build
+        run: npm run build --if-present
+
+      # TODO: Add deployment steps specific to this product
+      - name: Deploy placeholder
+        run: echo "🚀 Deploy step not yet configured for {{PRODUCT_NAME}}"
+
+      # Post-deploy health check
+      - name: Post-deploy health check
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.AGENT_PAT || secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: 'incident-detected',
+              client_payload: {
+                pattern: 'Deploy failed',
+                severity: 'critical',
+                count: 1,
+                hop_count: 0,
+              },
+            });

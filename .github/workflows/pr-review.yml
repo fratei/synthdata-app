@@ -1,0 +1,123 @@
+name: "🔍 PR Review & Auto-Merge"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  review-and-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "🔍 Classify PR Risk & Auto-Merge"
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.AGENT_PAT || secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            // Get changed files
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner, repo, pull_number: prNumber,
+            });
+            const filePaths = files.map(f => f.filename);
+
+            // Risk classification
+            const riskyPatterns = [
+              '.github/workflows/', 'infra/', 'k8s/',
+              'Dockerfile', 'docker-compose',
+              'package.json', 'package-lock.json',
+              '.env', 'billing', 'pricing', 'auth',
+            ];
+            const safePatterns = [
+              'src/', 'frontend/', 'docs/', 'strategy/',
+              'tests/', 'test/', '__tests__/', '.md',
+            ];
+
+            const isRisky = filePaths.some(f =>
+              riskyPatterns.some(p => f.includes(p))
+            );
+            const isSafe = !isRisky && filePaths.every(f =>
+              safePatterns.some(p => f.includes(p))
+            );
+
+            // Circuit breaker: max 5 auto-merges per day
+            const today = new Date().toISOString().split('T')[0];
+            const { data: todayPRs } = await github.rest.pulls.list({
+              owner, repo, state: 'closed', sort: 'updated',
+              direction: 'desc', per_page: 20,
+            });
+            const autoMergedToday = todayPRs.filter(pr =>
+              pr.merged_at && pr.merged_at >= `${today}T00:00:00Z` &&
+              pr.labels?.some(l => l.name === 'auto-merged')
+            ).length;
+
+            if (autoMergedToday >= 5) {
+              console.log('🛑 CIRCUIT BREAKER: 5 auto-merges today — skipping');
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: prNumber,
+                body: '🛑 **Auto-merge limit reached** (5/day). This PR will be reviewed next cycle.',
+              });
+              return;
+            }
+
+            if (isSafe) {
+              // Auto-approve and merge safe PRs
+              console.log(`✅ Safe PR — auto-merging (#${prNumber})`);
+
+              await github.rest.pulls.createReview({
+                owner, repo, pull_number: prNumber,
+                event: 'APPROVE',
+                body: '✅ **Auto-approved** — safe file changes only.\n\n*Reviewed by PR Pipeline — CreativeWare Agent System*',
+              });
+
+              // Wait 10 seconds (soak window)
+              await new Promise(r => setTimeout(r, 10000));
+
+              try {
+                await github.rest.pulls.merge({
+                  owner, repo, pull_number: prNumber,
+                  merge_method: 'squash',
+                });
+                await github.rest.issues.addLabels({
+                  owner, repo, issue_number: prNumber,
+                  labels: ['auto-merged'],
+                });
+                console.log(`✅ Merged #${prNumber}`);
+              } catch (e) {
+                console.log(`Merge failed: ${e.message}`);
+              }
+            } else if (isRisky) {
+              console.log(`⚠️ Risky PR — flagging for human review (#${prNumber})`);
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: prNumber,
+                body: [
+                  '⚠️ **Risky files detected** — requires human review.',
+                  '',
+                  'Files triggering review:',
+                  ...filePaths.filter(f => riskyPatterns.some(p => f.includes(p))).map(f => `- \`${f}\``),
+                  '',
+                  '@fratei please review and merge manually.',
+                ].join('\n'),
+              });
+              await github.rest.issues.addLabels({
+                owner, repo, issue_number: prNumber,
+                labels: ['needs-human-review'],
+              });
+            } else {
+              // Medium risk — auto-approve but don't auto-merge
+              await github.rest.pulls.createReview({
+                owner, repo, pull_number: prNumber,
+                event: 'APPROVE',
+                body: '✅ **Auto-approved** — standard changes.\n\n*Reviewed by PR Pipeline — CreativeWare Agent System*',
+              });
+              console.log(`✅ Approved #${prNumber} (not auto-merging — mixed files)`);
+            }

@@ -100,10 +100,26 @@ Submit a synthetic data generation job.
     "language": "en-US",
     "format": "wav",
     "speakers": 2,
-    "include_transcript": true
+    "include_transcript": true,
+    "topic": "customer support",
+    "transcript_format": "srt"
   }
 }
 ```
+
+`audio_options` fields:
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `voice` | string | `en-US-JennyNeural` | Azure Neural voice name |
+| `language` | string | `en-US` | BCP-47 language code |
+| `format` | string | `wav` | Audio format: `wav`, `mp3`, `ogg`, `flac` |
+| `speakers` | integer | `1` | Number of speakers (1–10). >1 generates a conversation. |
+| `include_transcript` | boolean | `true` | Include aligned transcript in the response |
+| `topic` | string | `null` | Topic or domain for transcript generation (e.g. `"medical dictation"`) |
+| `transcript_format` | string | `text` | Transcript output format: `text`, `json`, `srt`, `vtt` |
+| `noise_type` | string | `null` | *(Phase 2)* Background noise: `office`, `car`, `street`, `cafe` |
+| `acoustic_condition` | string | `null` | *(Phase 2)* Acoustic simulation: `reverb`, `phone`, `voip`, `clean` |
 
 **Response** `200 OK`
 ```json

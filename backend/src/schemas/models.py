@@ -41,9 +41,13 @@ class AudioOptions(BaseModel):
 
     voice: str = Field("en-US-JennyNeural", description="Azure Speech voice name")
     language: str = Field("en-US", description="Language code")
-    format: str = Field("wav", description="Audio format (wav, mp3, ogg)")
+    format: str = Field("wav", description="Audio format (wav, mp3, ogg, flac)")
     speakers: int = Field(1, description="Number of speakers for conversation generation")
     include_transcript: bool = Field(True, description="Include text transcript alongside audio")
+    topic: str | None = Field(None, description="Topic or domain for transcript generation (e.g. 'customer support', 'medical dictation')")
+    transcript_format: str = Field("text", description="Transcript output format (text, json, srt, vtt)")
+    noise_type: str | None = Field(None, description="Background noise type for Phase 2 acoustic simulation (office, car, street, cafe)")
+    acoustic_condition: str | None = Field(None, description="Acoustic condition for Phase 2 simulation (reverb, phone, voip, clean)")
 
 
 class GenerateRequest(BaseModel):

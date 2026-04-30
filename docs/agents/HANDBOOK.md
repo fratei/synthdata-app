@@ -1,4 +1,4 @@
-# {{PRODUCT_NAME}} — Agent Handbook
+# SynthData — Agent Handbook
 
 > Product-level agent operating standards. See also the [company-wide handbook](https://github.com/fratei/creative-ware-hq/blob/main/docs/agents/HANDBOOK.md).
 

@@ -1,4 +1,4 @@
-# 📊 {{PRODUCT_NAME}} Agent Dashboard
+# 📊 SynthData Agent Dashboard
 
 > Auto-updated by Observability Agent every 2h. Do not edit manually.
 

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: synthdata-api
+  labels:
+    app: synthdata-api
+    product: synthdata
+spec:
+  type: ClusterIP
+  selector:
+    app: synthdata-api
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+      name: http

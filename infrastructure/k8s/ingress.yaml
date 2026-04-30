@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: synthdata-api
+  labels:
+    app: synthdata-api
+    product: synthdata
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "60"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.synthdata.creativeware.ai
+      secretName: synthdata-tls
+  rules:
+    - host: api.synthdata.creativeware.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: synthdata-api
+                port:
+                  number: 80

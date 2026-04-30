@@ -238,3 +238,4 @@ All errors follow the standard format:
 | Free | 10 | 100 | 1 |
 | Pro | 60 | 10,000 | 10 |
 | Enterprise | 300 | 100,000 | 50 |
+# Test

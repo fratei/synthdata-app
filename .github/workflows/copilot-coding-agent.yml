@@ -1,0 +1,44 @@
+name: "Copilot Coding Agent"
+
+# GitHub Copilot coding agent — automatically implements issues assigned to @copilot.
+# The copilot-setup-steps job runs BEFORE the firewall is enabled,
+# so all network-dependent setup (pip install, etc.) must happen here.
+#
+# Usage: Go to any issue → Assignees → type "copilot" → assign it.
+
+on:
+  issues:
+    types: [opened, assigned]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  copilot-setup-steps:
+    if: >-
+      github.event.action == 'assigned' &&
+      github.event.assignee.login == 'copilot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies (runs before firewall)
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          python -c "import fastapi; print(f'fastapi {fastapi.__version__} ✓')"
+          python -c "import pydantic; print(f'pydantic {pydantic.__version__} ✓')"
+
+      - name: Validate syntax
+        run: |
+          cd backend
+          python -m py_compile src/main.py
+          echo "syntax check ✓"

@@ -8,6 +8,9 @@ on:
       agent: { type: choice, options: [all, cpo, cfo, cto], default: all }
   repository_dispatch:
     types: [agent-fleet-trigger]
+permissions:
+  contents: write
+  issues: write
 jobs:
   product-fleet:
     uses: fratei/creative-ware-hq/.github/workflows/reusable-product-fleet.yml@main

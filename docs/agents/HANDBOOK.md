@@ -2,6 +2,7 @@
 
 This product inherits the company-wide agent operating standards from
 [CreativeWare HQ Handbook](https://github.com/fratei/creative-ware-hq/blob/main/docs/agents/HANDBOOK.md).
+The link currently uses `main` and should be switched to the `v1` reference when the framework tag is published.
 
 ## Product-Specific Overrides
 

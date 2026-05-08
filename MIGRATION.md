@@ -17,7 +17,7 @@ This repository was migrated to consume the CreativeWare reusable agent framewor
 
 ## Framework reference and follow-up
 
-- Framework dependency PR: `fratei/creative-ware-hq` — “Reusable agent framework v1: composite actions, schemas, drift detection, smoke test, HR + budget agents, prompt registry, owner inbox”.
+- Framework dependency PR (link pending until available): `fratei/creative-ware-hq` — “Reusable agent framework v1: composite actions, schemas, drift detection, smoke test, HR + budget agents, prompt registry, owner inbox”.
 - Since the `v1` tag is not available yet, this repo currently references `@main` placeholders.
 - [ ] Switch all `uses:` references from `@main` to `@v1` once framework `v1.0.0` is tagged.
 

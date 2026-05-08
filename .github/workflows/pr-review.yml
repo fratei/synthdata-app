@@ -5,6 +5,10 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   schedule:
     - cron: "*/30 * * * *"
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
 jobs:
   pr-pipeline:
     uses: fratei/creative-ware-hq/.github/workflows/reusable-pr-pipeline.yml@main

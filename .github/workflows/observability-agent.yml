@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "30 */2 * * *"
   workflow_dispatch: {}
+permissions:
+  contents: write
+  issues: write
 jobs:
   observability:
     uses: fratei/creative-ware-hq/.github/workflows/reusable-observability.yml@main

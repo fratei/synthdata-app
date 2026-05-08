@@ -11,7 +11,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # ─── PR checks: lint + test only ─────────────────────────────────────
+  # ─── PR checks: frontend lint + backend tests ───────────────────────────
   pr-checks:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -22,17 +22,33 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
-        run: npm ci --if-present
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
 
-      - name: Lint
+      - name: Lint frontend
+        working-directory: frontend
         run: npm run lint --if-present
 
-      - name: Test
-        run: npm test --if-present
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-  # ─── Push to main: build + deploy ────────────────────────────────────
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Test backend
+        working-directory: backend
+        run: pytest tests/ -v
+
+  # ─── Push to main: frontend build + deploy ──────────────────────────────
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -43,11 +59,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
-        run: npm ci --if-present
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
 
-      - name: Build
+      - name: Build frontend
+        working-directory: frontend
         run: npm run build --if-present
 
       # TODO: Add deployment steps specific to this product

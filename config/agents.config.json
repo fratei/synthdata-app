@@ -1,0 +1,18 @@
+{
+  "$schema": "https://github.com/fratei/creative-ware-hq/blob/main/framework/schemas/autonomy-tiers.json",
+  "$inherit_from": "fratei/creative-ware-hq@main:config/agents.config.json",
+  "owner": {
+    "primary": "fratei",
+    "decision_sla_hours": 72,
+    "auto_approve_after_hours": 96
+  },
+  "circuit_breakers": {
+    "max_auto_merges_per_day": 5,
+    "max_dispatcher_issues_per_day": 10
+  },
+  "autonomy": {
+    "tiers": {
+      "high_extra_paths": ["**/data/**", "**/synthetic-data/**", "**/privacy/**"]
+    }
+  }
+}

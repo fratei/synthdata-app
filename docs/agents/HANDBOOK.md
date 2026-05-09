@@ -1,23 +1,24 @@
-# SynthData — Agent Handbook
+# SynthData Agent Handbook
 
-> Product-level agent operating standards. See also the [company-wide handbook](https://github.com/fratei/creative-ware-hq/blob/main/docs/agents/HANDBOOK.md).
+This product inherits the company-wide agent operating standards from
+[CreativeWare HQ Handbook](https://github.com/fratei/creative-ware-hq/blob/main/docs/agents/HANDBOOK.md).
+The link currently uses `main` and should be switched to the `v1` reference when the framework tag is published.
 
-## Product Agents
+## Product-Specific Overrides
 
-| Agent | Role |
-|-------|------|
-| 📦 CPO | Product roadmap, feature prioritization |
-| 🔧 CTO | Technical architecture, tech debt |
-| 💰 CFO | Financial analysis |
-| 💻 Engineering | Implementation via @copilot |
-| 🧪 QA | Testing, quality gates |
-| ⚙️ DevOps | CI/CD, monitoring |
+### Sensitive paths (escalate to owner regardless of tier)
+- `**/data/**` — synthetic data generation logic
+- `**/synthetic-data/**` — outputs and templates
+- `**/privacy/**` — privacy-related code paths
 
-## Operating Rules
+These are enforced via `config/agents.config.json#autonomy.tiers.high_extra_paths`.
 
-- Follow the [company-wide handbook](https://github.com/fratei/creative-ware-hq/blob/main/docs/agents/HANDBOOK.md)
-- Auto-approve safe changes (src/, docs/, tests/)
-- Escalate risky changes (workflows, infra, billing, auth)
-- Max 5 auto-merges per day
-- State persists in `strategy/agent-state/`
-- Outcomes tracked in `strategy/outcomes/`
+### Higher SLA
+SynthData uses a 72h decision SLA (vs HQ's 48h) because it's in `development` status
+with no live customers.
+
+## Linked Resources
+
+- [Agent Charters](./charters/) — copied from framework main (switch to v1 after tag)
+- [Framework Version](../../framework-version)
+- [Local Config Overrides](../../config/agents.config.json)

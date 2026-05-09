@@ -1,0 +1,12 @@
+{
+  "agent": "cto",
+  "last_run_utc": null,
+  "pending_handoffs": [],
+  "metrics_30d": {
+    "runs": 0,
+    "issues_opened": 0,
+    "issues_closed": 0,
+    "prs_reviewed": 0,
+    "escalations": 0
+  }
+}

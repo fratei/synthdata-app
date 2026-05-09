@@ -1,107 +1,19 @@
-name: "🏢 Product Agent Fleet"
-
+# TODO: switch @main to @v1 once CreativeWare framework v1.0.0 is tagged.
+name: "🏢 Product Agent Fleet — SynthData"
 on:
   schedule:
-    - cron: "15 */2 * * *"
+    - cron: "15 */6 * * *"
   workflow_dispatch:
     inputs:
-      agent:
-        description: "Which agent to run"
-        type: choice
-        options:
-          - "all"
-          - "cpo"
-          - "cfo"
-          - "cto"
-        default: "all"
+      agent: { type: choice, options: [all, cpo, cfo, cto], default: all }
   repository_dispatch:
     types: [agent-fleet-trigger]
-
 permissions:
   contents: write
   issues: write
-
 jobs:
-  product-agents:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.AGENT_PAT || secrets.GITHUB_TOKEN }}
-
-      - name: "📦 Product Agent Fleet"
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.AGENT_PAT || secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-
-            // Read agent state
-            const stateFile = 'strategy/agent-state/metrics.md';
-            let lastRun = 'never';
-            if (fs.existsSync(stateFile)) {
-              const state = fs.readFileSync(stateFile, 'utf-8');
-              const match = state.match(/Last updated: (.+)/);
-              if (match) lastRun = match[1];
-            }
-
-            console.log(`Product agent fleet running. Last run: ${lastRun}`);
-
-            // Check for open opportunities
-            const opDir = 'strategy/opportunities';
-            if (fs.existsSync(opDir)) {
-              const files = fs.readdirSync(opDir).filter(f => f.endsWith('.md') && !['INDEX.md', 'README.md'].includes(f));
-              console.log(`Found ${files.length} opportunity briefs`);
-
-              // Check which are already tracked as issues
-              const { data: existing } = await github.rest.issues.listForRepo({
-                owner, repo, state: 'all', labels: 'opportunity', per_page: 100,
-              });
-              const existingTitles = new Set(existing.map(i => i.title));
-
-              let created = 0;
-              for (const file of files) {
-                const content = fs.readFileSync(`${opDir}/${file}`, 'utf-8');
-                const titleMatch = content.match(/^#\s+(.+)/m);
-                if (!titleMatch) continue;
-                const briefTitle = titleMatch[1].replace(/^Opportunity Brief:\s*/i, '').trim();
-                const issueTitle = `[OPPORTUNITY] ${briefTitle}`;
-
-                if (existingTitles.has(issueTitle)) continue;
-
-                try {
-                  await github.rest.issues.create({
-                    owner, repo,
-                    title: issueTitle,
-                    body: `## Opportunity: ${briefTitle}\n\nSee \`strategy/opportunities/${file}\` for full brief.\n\n@fratei — review and approve to proceed.`,
-                    labels: ['opportunity', 'needs-owner-approval'],
-                    assignees: ['fratei'],
-                  });
-                  created++;
-                  if (created >= 3) break;
-                } catch (e) {
-                  console.log(`Failed to create issue: ${e.message}`);
-                }
-              }
-              console.log(`Created ${created} opportunity issues`);
-            }
-
-            // Update state
-            const { execSync } = require('child_process');
-            const now = new Date().toISOString();
-            fs.mkdirSync('strategy/agent-state', { recursive: true });
-            fs.writeFileSync(stateFile, `# Agent Fleet Metrics\n\n- Last run: ${now}\n\n---\n*Last updated: ${now}*\n`);
-            try {
-              execSync('git config user.name "CreativeWare Bot"');
-              execSync('git config user.email "bot@creative-ware.ai"');
-              execSync(`git add ${stateFile}`);
-              const diff = execSync('git diff --cached --name-only').toString().trim();
-              if (diff) {
-                execSync('git commit -m "chore: update agent state [skip ci]"');
-                execSync('git push origin HEAD:main');
-              }
-            } catch (e) {
-              console.log(`State update failed: ${e.message}`);
-            }
+  product-fleet:
+    uses: fratei/creative-ware-hq/.github/workflows/reusable-product-fleet.yml@main
+    with:
+      agent: ${{ inputs.agent || 'all' }}
+    secrets: inherit

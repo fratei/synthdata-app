@@ -28,4 +28,16 @@ This repository was migrated to consume the CreativeWare reusable agent framewor
 ## Smoke verification
 
 Manual `workflow_dispatch` smoke trigger for `product-agent-fleet.yml` could not be executed from this local migration environment. Run it in GitHub Actions UI after merge to verify reusable workflow wiring.
-- [ ] Post-merge: trigger `🏢 Product Agent Fleet — SynthData` with `agent=all` and confirm successful reusable workflow run.
+- [ ] Post-merge: trigger `🏢 Product Agent Fleet — SynthData` and confirm successful reusable workflow run.
+
+## Post-Phase 2 outcomes audit (2026-05-10)
+
+- [x] Verified required files and templates are present (`.github/workflows/*`, `.github/pull_request_template.md`, `config/agents.config.json`, `docs/agents/*`, `strategy/agent-state/*.json`).
+- [x] Validated baseline code quality gates locally (`cd backend && pytest tests/ -v` → passing).
+- [x] Investigated GitHub Actions history and identified reusable-workflow contract drift as the primary autonomy blocker.
+- [x] Fixed PR pipeline reusable workflow inputs (`owner`, `repo`) in `.github/workflows/pr-review.yml`.
+- [x] Fixed product fleet reusable workflow inputs (`registry_path`) in `.github/workflows/product-agent-fleet.yml`.
+- [x] Added `products/registry.json` to satisfy product fleet reusable workflow expectations.
+- [ ] Manual post-merge verification: run `🔍 PR Review & Auto-Merge — SynthData` via `workflow_dispatch` and confirm successful startup.
+- [ ] Manual post-merge verification: run `🏢 Product Agent Fleet — SynthData` via `workflow_dispatch` and confirm successful startup.
+- [ ] Admin-only checks still required: confirm `AGENT_PAT` + deployment secrets, branch protection, and incident routing in repository settings.

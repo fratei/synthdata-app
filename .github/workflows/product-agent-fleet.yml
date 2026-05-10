@@ -3,9 +3,7 @@ name: "🏢 Product Agent Fleet — SynthData"
 on:
   schedule:
     - cron: "15 */6 * * *"
-  workflow_dispatch:
-    inputs:
-      agent: { type: choice, options: [all, cpo, cfo, cto], default: all }
+  workflow_dispatch: {}
   repository_dispatch:
     types: [agent-fleet-trigger]
 
@@ -21,5 +19,5 @@ jobs:
     timeout-minutes: 30
     uses: fratei/creative-ware-hq/.github/workflows/reusable-product-fleet.yml@main
     with:
-      agent: ${{ inputs.agent || 'all' }}
+      registry_path: products/registry.json
     secrets: inherit

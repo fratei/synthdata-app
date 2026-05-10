@@ -1,0 +1,12 @@
+{
+  "products": [
+    {
+      "name": "SynthData",
+      "repo": "fratei/synthdata-app",
+      "status": "development",
+      "stack": "Python/FastAPI, Azure OpenAI, Azure Speech, Azure Blob Storage",
+      "created": "2026",
+      "description": "AI-powered synthetic data generation platform"
+    }
+  ]
+}

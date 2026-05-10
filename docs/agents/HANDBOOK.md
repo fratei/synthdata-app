@@ -22,3 +22,14 @@ with no live customers.
 - [Agent Charters](./charters/) — copied from framework main (switch to v1 after tag)
 - [Framework Version](../../framework-version)
 - [Local Config Overrides](../../config/agents.config.json)
+
+## Human/Admin Actions Checklist
+
+Use this checklist when enabling new autonomy stages for SynthData:
+
+- [ ] Configure required repository secrets (`AGENT_PAT`, cloud/provider credentials, deploy credentials).
+- [ ] Enable branch protection on `main` (required status checks + review policy).
+- [ ] Enable auto-merge policy only after CI and PR pipeline are stable.
+- [ ] Verify scheduled workflows are enabled in repository settings.
+- [ ] Confirm incident routing (for `incident-detected` repository dispatch events).
+- [ ] When framework `v1` is available, switch all `@main` reusable workflow references to `@v1`.

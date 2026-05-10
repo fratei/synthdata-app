@@ -6,6 +6,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write
@@ -18,7 +22,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Detect frontend app readiness
+        id: frontend
+        run: |
+          if [ -d frontend/app ] || [ -d frontend/pages ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Node.js
+        if: steps.frontend.outputs.ready == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -26,12 +40,18 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
+        if: steps.frontend.outputs.ready == 'true'
         working-directory: frontend
         run: npm install
 
       - name: Lint frontend
+        if: steps.frontend.outputs.ready == 'true'
         working-directory: frontend
         run: npm run lint --if-present
+
+      - name: Skip frontend lint (frontend scaffold not ready)
+        if: steps.frontend.outputs.ready != 'true'
+        run: echo "Skipping frontend lint until frontend/app or frontend/pages exists."
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -55,7 +75,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Detect frontend app readiness
+        id: frontend
+        run: |
+          if [ -d frontend/app ] || [ -d frontend/pages ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Node.js
+        if: steps.frontend.outputs.ready == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -63,16 +93,22 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
+        if: steps.frontend.outputs.ready == 'true'
         working-directory: frontend
         run: npm install
 
       - name: Build frontend
+        if: steps.frontend.outputs.ready == 'true'
         working-directory: frontend
         run: npm run build --if-present
 
+      - name: Skip frontend build (frontend scaffold not ready)
+        if: steps.frontend.outputs.ready != 'true'
+        run: echo "Skipping frontend build until frontend/app or frontend/pages exists."
+
       # TODO: Add deployment steps specific to this product
       - name: Deploy placeholder
-        run: echo "🚀 Deploy step not yet configured for {{PRODUCT_NAME}}"
+        run: echo "🚀 Deploy step not yet configured for SynthData"
 
       # Post-deploy health check
       - name: Post-deploy health check

@@ -1,15 +1,21 @@
 # TODO: switch @main to @v1 once CreativeWare framework v1.0.0 is tagged.
-name: "�� PR Review & Auto-Merge — SynthData"
+name: "🔍 PR Review & Auto-Merge — SynthData"
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   schedule:
     - cron: "*/30 * * * *"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pull-requests: write
   issues: write
 jobs:
   pr-pipeline:
+    timeout-minutes: 30
     uses: fratei/creative-ware-hq/.github/workflows/reusable-pr-pipeline.yml@main
     secrets: inherit

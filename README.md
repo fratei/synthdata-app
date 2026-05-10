@@ -150,6 +150,8 @@ This product runs an autonomous agent fleet:
 - **CI/CD** — Automated lint → test → build → deploy
 
 See [Agent Dashboard](docs/agents/DASHBOARD.md) for live status.
+For repository-level rollout steps and manual controls, see the
+[Agent Handbook checklist](docs/agents/HANDBOOK.md#humanadmin-actions-checklist).
 
 ## Links
 
@@ -166,4 +168,3 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ---
 *Part of [CreativeWare](https://github.com/fratei/creative-ware-hq) — Autonomous AI Company*
-
